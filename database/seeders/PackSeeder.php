@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class PackSeeder extends Seeder
 {
-    const PACKSIZES = [250, 500, 1000, 2000, 5000];
+    const PACK_SIZES = [250, 500, 1000, 2000, 5000];
 
     /**
      * Run the database seeds.
@@ -16,7 +16,7 @@ class PackSeeder extends Seeder
      */
     public function run()
     {
-        foreach (self::PACKSIZES as $pack) {
+        foreach (self::PACK_SIZES as $pack) {
             DB::table('packs')->insert([
                 'size' => $pack,
             ]);
