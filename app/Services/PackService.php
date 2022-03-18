@@ -3,9 +3,15 @@
 namespace App\Services;
 
 use App\Models\Pack;
+use Illuminate\Http\Request;
 
 class PackService
 {
+    /**
+     * @var Pack
+     */
+    protected Pack $pack;
+
     /**
      * @param Pack $pack
      */
@@ -16,16 +22,30 @@ class PackService
     }
 
     /**
+     * @param Request $request
+     * @return array
+     */
+    public function validatePackInput(
+        Request $request
+    ): array {
+        return $request->validate(['ordered-packs' => 'required|numeric|gt:0']);
+    }
+
+    /**
      * Get packs to send
      *
      * @param float $orderTotal
-     * @return array
+     * @return array|null
      */
     public function getPacksToSend(
         float $orderTotal
-    ): array {
+    ): ?array {
         $requiredPackSizes = [];
         $packSizes = $this->pack->all()->sortByDesc('size')->pluck('size');
+
+        if ($packSizes->isEmpty()) {
+            return null;
+        }
 
         foreach ($packSizes as $key => $size) {
             if ($key === (count($packSizes) - 1)) {
