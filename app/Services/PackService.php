@@ -1,24 +1,32 @@
 <?php
 
-
 namespace App\Services;
-
 
 use App\Models\Pack;
 
 class PackService
 {
     /**
+     * @param Pack $pack
+     */
+    public function __construct(
+        Pack $pack
+    ) {
+        $this->pack = $pack;
+    }
+
+    /**
      * Get packs to send
      *
-     * @param int $ordered
+     * @param float $orderTotal
      * @return array
      */
     public function getPacksToSend(
-        int $orderTotal
+        float $orderTotal
     ): array {
         $requiredPackSizes = [];
-        $packSizes = Pack::all()->sortByDesc('size')->pluck('size');
+        $packSizes = $this->pack->all()->sortByDesc('size')->pluck('size');
+
         foreach ($packSizes as $key => $size) {
             if ($key === (count($packSizes) - 1)) {
                 if ($size < $orderTotal) {
@@ -32,10 +40,9 @@ class PackService
                 $requiredPackSizes[] = $size;
             }
 
-        }
-
-        if ($orderTotal !== 0) {
-            $requiredPackSizes[] = $packSizes->last();
+            if ($orderTotal > 0 && $size === $packSizes->last()) {
+                $requiredPackSizes[] = $packSizes->last();
+            }
         }
 
         return array_count_values($requiredPackSizes);
