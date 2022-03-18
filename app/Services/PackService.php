@@ -34,11 +34,11 @@ class PackService
     /**
      * Get packs to send
      *
-     * @param float $orderTotal
+     * @param float $remainingPacks
      * @return array|null
      */
     public function getPacksToSend(
-        float $orderTotal
+        float $remainingPacks
     ): ?array {
         $requiredPackSizes = [];
         $packSizes = $this->pack->all()->sortByDesc('size')->pluck('size');
@@ -48,23 +48,25 @@ class PackService
         }
 
         foreach ($packSizes as $key => $size) {
-            if ($key === (count($packSizes) - 1)) {
-                if ($size < $orderTotal) {
-                    $requiredPackSizes[] = $packSizes->get(count($packSizes) - 2);
-                    break;
+            $qty = floor($remainingPacks / $size);
+            $remainingPacks = $remainingPacks % $size;
+
+            if ($key === (count($packSizes) - 2)) {
+                if ($size > $remainingPacks && $remainingPacks > $packSizes->get(count($packSizes) - 1)) {
+                    $remainingPacks = 0;
+                    $qty++;
                 }
             }
 
-            while ($size <= $orderTotal) {
-                $orderTotal = $orderTotal - $size;
-                $requiredPackSizes[] = $size;
+            if ($remainingPacks > 0 && $size === $packSizes->last()) {
+                $qty++;
             }
 
-            if ($orderTotal > 0 && $size === $packSizes->last()) {
-                $requiredPackSizes[] = $packSizes->last();
+            if ($qty) {
+                $requiredPackSizes[] = ['size' => $size, 'qty' => $qty];
             }
         }
 
-        return array_count_values($requiredPackSizes);
+        return $requiredPackSizes;
     }
 }

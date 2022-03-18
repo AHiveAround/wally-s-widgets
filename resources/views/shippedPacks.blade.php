@@ -7,10 +7,10 @@
             <th>Pack Size</th>
             <th>Qty</th>
         </tr>
-        @foreach($orderedPackets as $packSize => $qty)
+        @foreach($orderedPackets as $pack)
             <tr>
-                <td>{{ $packSize }}</td>
-                <td>{{ $qty }}</td>
+                <td>{{ $pack['size'] }}</td>
+                <td>{{ $pack['qty'] }}</td>
             </tr>
         @endforeach
     </table>
