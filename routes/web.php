@@ -14,4 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('/', PackController::class);
+Route::get('/',[PackController::class, 'index']);
+Route::post('packs', [PackController::class, 'getPacksToSend']);
