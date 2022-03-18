@@ -6,6 +6,7 @@ use App\Services\PackService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class PackController extends Controller
@@ -13,7 +14,7 @@ class PackController extends Controller
     /**
      * @var PackService
      */
-    public $packService;
+    protected PackService  $packService;
 
     /**
      * @param PackService $packService
@@ -34,15 +35,17 @@ class PackController extends Controller
 
     /**
      * @param Request $request
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function getPacksToSend(
         Request $request
-    ): Application|Factory|View {
-        $ordered = $request->validate([
-            'ordered-packs' => 'required|numeric|gt:0'
-        ]);
+    ): Application|Factory|View|RedirectResponse {
+        $ordered = $this->packService->validatePackInput($request);
         $orderedPackets = $this->packService->getPacksToSend($ordered['ordered-packs']);
+
+        if (!$orderedPackets) {
+            return back()->withErrors('No packet sizes available');
+        }
 
         return view('shippedPacks', ['orderedPackets' => $orderedPackets]);
     }
